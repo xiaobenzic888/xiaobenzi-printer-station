@@ -1,0 +1,47 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Pages 需在仓库 Settings → Pages 里手动开启一次（Source 选 GitHub Actions）
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      # 纯静态站，无需构建；只挑发布需要的文件（避免把 .git 等打进包）
+      - name: Assemble deploy site
+        run: |
+          set -e
+          mkdir -p _site
+          cp index.html _site/
+          cp -r HTML_1 _site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

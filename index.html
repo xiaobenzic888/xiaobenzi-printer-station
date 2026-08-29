@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小本子打印服务</title>
+    <style>
+        /* 全局设置 */
+        :root {
+            --primary-color: #4A90E2;
+            /* 主色调：一种舒适的蓝色 */
+            --accent-color: #FF6B6B;
+            /* 强调色：用于特别注意 */
+            --bg-color: #f0f2f5;
+            /* 背景色 */
+            --card-bg: #ffffff;
+            /* 卡片背景 */
+            --text-main: #333333;
+            --text-secondary: #666666;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* 顶部固定导航栏 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, #4a90e2, #67B26F);
+            box-shadow: 0 2px 16px rgba(74, 144, 226, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 20px;
+        }
+
+        .top-nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .top-nav-inner::-webkit-scrollbar {
+            display: none;
+        }
+
+        .top-nav-title {
+            font-size: 0.82rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.95);
+            white-space: nowrap;
+            margin-right: 6px;
+            padding-right: 10px;
+            border-right: 1px solid rgba(255, 255, 255, 0.35);
+            flex-shrink: 0;
+        }
+
+        .top-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            color: #333;
+            white-space: nowrap;
+            border-radius: 18px;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1.5px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .top-nav-item:hover {
+            background: #fff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .top-nav-item.active {
+            background: #2d7dd2;
+            color: #fff !important;
+            font-weight: 700;
+            border-color: #1a6bb5;
+            box-shadow: 0 2px 8px rgba(45, 125, 210, 0.4);
+            transform: none;
+        }
+
+        .top-nav-item .nav-icon {
+            font-size: 0.92rem;
+        }
+
+        .top-nav-item.contact-btn {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: #07C160;
+            color: #07C160;
+            font-weight: 600;
+        }
+
+        .top-nav-item.contact-btn:hover {
+            background: rgba(7, 193, 96, 0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(7, 193, 96, 0.3);
+        }
+
+        /* 打印机状态指示器 */
+        .printer-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: #f0f7ff;
+            border-bottom: 1px solid #e1e8f0;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .status-dot.green {
+            background: #34c759;
+            box-shadow: 0 0 6px rgba(52, 199, 89, 0.5);
+            animation: pulse-green 2s infinite;
+        }
+
+        .status-dot.yellow {
+            background: #ffcc00;
+            box-shadow: 0 0 6px rgba(255, 204, 0, 0.5);
+            animation: pulse-yellow 2s infinite;
+        }
+
+        .status-dot.red {
+            background: #ff3b30;
+            box-shadow: 0 0 6px rgba(255, 59, 48, 0.5);
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-green {
+
+            0%,
+            100% {
+                box-shadow: 0 0 4px rgba(52, 199, 89, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 12px rgba(52, 199, 89, 0.7);
+            }
+        }
+
+        @keyframes pulse-yellow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 4px rgba(255, 204, 0, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 12px rgba(255, 204, 0, 0.7);
+            }
+        }
+
+        @keyframes pulse-red {
+
+            0%,
+            100% {
+                box-shadow: 0 0 4px rgba(255, 59, 48, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 12px rgba(255, 59, 48, 0.7);
+            }
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-desc {
+            font-size: 0.78rem;
+            color: #666;
+            margin-left: 2px;
+        }
+
+        /* 手机端适配 - 仅缩小字号间距，不改变布局结构 */
+        @media (max-width: 600px) {
+            .top-nav {
+                padding: 4px 8px;
+            }
+
+            .top-nav-title {
+                font-size: 0.7rem;
+                margin-right: 3px;
+                padding-right: 6px;
+            }
+
+            .top-nav-item {
+                padding: 5px 7px;
+                font-size: 0.66rem;
+                border-radius: 12px;
+                gap: 2px;
+            }
+
+            .top-nav-item .nav-icon {
+                font-size: 0.75rem;
+            }
+
+            .page-body {
+                padding: 50px 8px 10px;
+            }
+
+            .container {
+                border-radius: 14px;
+            }
+
+            .header {
+                padding: 10px 14px;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .version-tag {
+                font-size: 0.72rem;
+            }
+
+            .printer-status-bar {
+                padding: 5px 10px;
+                gap: 3px;
+            }
+
+            .status-text {
+                font-size: 0.74rem;
+            }
+
+            .status-desc {
+                font-size: 0.66rem;
+            }
+
+            .notice-banner {
+                padding: 11px 10px;
+                margin-bottom: 12px;
+                border-radius: 9px;
+            }
+
+            .notice-banner .notice-title-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 7px;
+            }
+
+            .notice-banner .notice-title {
+                font-size: 0.88rem;
+            }
+
+            .notice-banner .notice-date {
+                font-size: 0.65rem;
+                color: #999;
+            }
+
+            .notice-banner .notice-content {
+                font-size: 0.8rem;
+                line-height: 1.55;
+            }
+
+            .notice-banner .notice-item {
+                margin-bottom: 6px;
+                gap: 4px;
+            }
+
+            .notice-banner .notice-footer {
+                font-size: 0.72rem;
+                margin-top: 7px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -8px;
+                padding: 0 8px;
+            }
+
+            .price-tier-table {
+                font-size: 0.68rem;
+                min-width: 360px;
+            }
+
+            .price-tier-table th {
+                padding: 6px 4px;
+                font-size: 0.68rem;
+            }
+
+            .price-tier-table td {
+                padding: 8px 4px;
+            }
+
+            .price-tier-table .tier-pages {
+                font-size: 0.82rem;
+            }
+
+            .price-tier-table .price-value {
+                font-size: 0.85rem;
+            }
+
+            .price-tier-table .tier-name {
+                font-size: 0.62rem;
+            }
+
+            .calculator {
+                padding: 12px 10px;
+                border-radius: 10px;
+            }
+
+            .calculator .section-title {
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+
+            .calc-row {
+                gap: 6px;
+                margin-bottom: 8px;
+                align-items: center;
+            }
+
+            .calc-label {
+                flex: 0 0 65px;
+                font-size: 0.8rem;
+            }
+
+            .calc-input,
+            .calc-select {
+                font-size: 0.82rem;
+                padding: 7px 24px 7px 8px;
+                border-radius: 6px;
+                min-width: 140px;
+            }
+
+            .calc-select option {
+                font-size: 0.78rem;
+            }
+
+            .calc-button {
+                padding: 9px 14px;
+                font-size: 0.84rem;
+                border-radius: 6px;
+            }
+
+            .calc-result {
+                padding: 9px 10px;
+            }
+
+            .guide-section,
+            .warning-section,
+            .note-section {
+                padding: 11px 10px !important;
+                border-radius: 9px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .section-title {
+                font-size: 0.88rem !important;
+            }
+        }
+
+        /* 页面主体需要留出导航栏高度 */
+        .page-body {
+            padding: 58px 20px 20px;
+        }
+
+        /* 容器卡片 */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* 头部区域 */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #67B26F);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        .header .subtitle {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .version-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-top: 5px;
+        }
+
+        /* 阶梯定价表格 */
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .price-table th,
+        .price-table td {
+            border: 1px solid #e1e4e8;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .price-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .price-table tr:nth-child(even) {
+            background-color: #fff;
+        }
+
+        .price-table tr:nth-child(odd) {
+            background-color: #fff;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        /* 内容区域 */
+        .content {
+            padding: 25px;
+        }
+
+        /* 价格卡片 */
+        .price-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .price-card {
+            flex: 1;
+            min-width: 140px;
+            background: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .price-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
+        }
+
+        .price-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .unit {
+            font-size: 0.8rem;
+            font-weight: normal;
+            color: var(--text-secondary);
+        }
+
+        .price-note {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* 规则列表 */
+        .rules-box {
+            background: #fff;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .warning-box {
+            background-color: #fff4f4;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #d63031;
+        }
+
+        .xbz-box {
+            background-color: #fffbe3;
+            border-left: 0px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #10383e;
+        }
+
+        .wechat-qr-box {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .wechat-qr {
+            width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            border: 3px solid #07C160;
+            box-shadow: 0 6px 20px rgba(7, 193, 96, 0.25);
+            background: #fff;
+            padding: 4px;
+        }
+
+        .wechat-qr-caption {
+            font-size: 0.88rem;
+            color: #07C160;
+            margin-top: 10px;
+            font-weight: 700;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* 底部个人信息 */
+        .footer-note {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #ddd;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* 二维码区域 */
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background-color: #eee;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            border-radius: 10px;
+            border: 2px dashed #ccc;
+        }
+
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        /* 强调文字 */
+        strong {
+            color: var(--text-main);
+        }
+
+        .highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* 计算器样式 */
+        .calculator {
+            background: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .calculator .section-title {
+            margin-bottom: 20px;
+        }
+
+        .calc-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .calc-label {
+            flex: 0 0 120px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .calc-input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 12px;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #fff;
+        }
+
+        .calc-select {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 32px 10px 12px;
+            border: 2px solid #d0d7de;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%234a90e2' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            transition: all 0.25s ease;
+        }
+
+        .calc-select:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.12);
+        }
+
+        .calc-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.18);
+        }
+
+        .calc-button {
+            background: linear-gradient(135deg, var(--primary-color), #67B26F);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            width: 100%;
+        }
+
+        .calc-button:hover {
+            opacity: 0.9;
+        }
+
+        .calc-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .calc-result.show {
+            display: block;
+        }
+
+        .result-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .result-unit {
+            font-size: 1rem;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .result-info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .result-formula {
+            font-size: 0.78rem;
+            color: #999;
+            margin-top: 4px;
+            font-family: "Menlo", "Consolas", monospace;
+        }
+
+        /* 优化后的阶梯定价卡片样式 */
+        .price-tier-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(74, 144, 226, 0.12);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .price-tier-card .section-title rgin: 0;
+        padding: 15px 20px;
+
+        border-left: .ptier-ca {
+            width: 100%;
+            border-collapse: c15px 2opxllapse;
+            font-size: 0.9rem;
+        }
+
+        .prfont-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #e1e4e8;
+        }
+
+        .price-tier-table td {
+            padding: 14px 10px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .price-tier-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .price-tier-table .tier-name {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .price-tier-table .tier-pages {
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .price-tier-table .price-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #4A90E2;
+        }
+
+        .price-tier-table tr:nth-child(1) .price-value {
+            color: #FF9800;
+        }
+
+        .price-tier-table tr:nth-child(2) .price-value {
+            color: #4CAF50;
+        }
+
+        .price-tier-table tr:nth-child(3) .price-value {
+            color: #4A90E2;
+        }
+
+        .tier-highlight {
+            background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+            font-weight: 600;
+        }
+
+        /* 公告栏样式 */
+        .notice-banner {
+            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+            border: 2px solid #4CAF50;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .notice-banner .notice-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .notice-banner .notice-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #e65100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notice-banner .notice-date {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .notice-banner .notice-content {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .notice-banner .notice-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .notice-banner .notice-footer {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+
+        /* 自助打印模式通知样式 */
+        .self-service-notice {
+            background: linear-gradient(135deg, #fffde7, #fff8e1);
+            border: 2px solid #FFC107;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .self-service-notice .notice-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .self-service-notice .notice-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #e65100;
+        }
+
+        .self-service-notice .notice-date {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .self-service-notice .notice-content {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .self-service-notice .notice-item {
+            margin-bottom: 10px;
+        }
+
+        .self-service-notice .notice-footer {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .self-service-notice .notice-reminder {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.7;
+            padding: 10px;
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 8px;
+        }
+
+
+        /* 二维码气泡弹窗 */
+        .qr-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .qr-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .qr-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+
+        .qr-modal-overlay.show .qr-modal {
+            transform: scale(1);
+        }
+
+        .qr-modal-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+
+        .qr-image {
+            background: #f5f5f5;
+            border-radius: 12px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #999;
+            border: 2px dashed #ddd;
+            padding: 8px;
+            max-width: 100%;
+        }
+
+        .qr-image img {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .qr-hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .qr-close-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .qr-close-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 云印链接样式 */
+        .cloud-print-link {
+            color: var(--primary-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .cloud-print-link:hover {
+            color: #357abd;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 顶部固定导航栏 -->
+    <div class="top-nav">
+        <div class="top-nav-inner">
+            <div class="top-nav-title">📑 导航栏</div>
+            <div class="top-nav-item" onclick="scrollToSection('notice')" data-section="notice">
+                <span class="nav-icon">📢</span>
+                <span>公告通知</span>
+            </div>
+            <div class="top-nav-item" onclick="scrollToSection('pricing')" data-section="pricing">
+                <span class="nav-icon">💰</span>
+                <span>收费标准</span>
+            </div>
+            <div class="top-nav-item" onclick="scrollToSection('calculator')" data-section="calculator">
+                <span class="nav-icon">🧮</span>
+                <span>价格计算</span>
+            </div>
+            <div class="top-nav-item" onclick="scrollToSection('guide')" data-section="guide">
+                <span class="nav-icon">📜</span>
+                <span>打印须知</span>
+            </div>
+            <div class="top-nav-item contact-btn" onclick="scrollToSection('contact')" data-section="contact">
+                <span class="nav-icon">💬</span>
+                <span>立即联系</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="container">
+            <div class="header">
+                <h1>📄 <span style="color: #FFD700; text-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);">小本子</span>打印站 🖨
+                </h1>
+                <div class="version-tag">v1.7 2026/07/10 更新</div>
+            </div>
+
+            <!-- 打印机状态 -->
+            <div class="printer-status-bar" id="printerStatusBar">
+                <span class="status-dot green" id="statusDot"></span>
+                <span class="status-text" id="statusText">打印机在线</span>
+                <span class="status-desc" id="statusDesc">· 24h之内可使用</span>
+            </div>
+
+            <div class="content">
+                <!-- 自助打印模式通知 -->
+                <div class="self-service-notice">
+                    <div class="notice-title-row">
+                        <div class="notice-title">⚠️ 当前为自助打印模式</div>
+                        <div class="notice-date">2026.07.10 16:00</div>
+                    </div>
+                    <div class="notice-content">
+                        <div class="notice-item">
+                            <span>由于打印站工作人员均外出，当前为自助远程打印模式</span>
+                        </div>
+                        <div class="notice-item">
+                            <span>✅ 可通过微信视频远程协助 + 自助打印</span>
+                        </div>
+                        <div class="notice-item">
+                            <span>（为避免排版错误，暂时不建议双面打印）</span>
+                        </div>
+                        <div class="notice-item">
+                            <span>⏰ 预计恢复时间：2026年7月13日（星期一）</span>
+                        </div>
+                    </div>
+                    <div class="notice-footer">感谢大家的理解与支持！</div>
+                    <div class="notice-reminder">
+                        请在不打扰大家学习和休息的情况下，友情连线，友好求助。请爱护机器，防止机器掉落！注意不可打扰舍友休息和学习，不可随意翻动私人用品。
+                    </div>
+                </div>
+
+                <!-- 公告栏 -->
+                <div id="notice" class="notice-banner">
+                    <div class="notice-title-row">
+                        <div class="notice-title">📢 服务恢复 & 运营调整公告</div>
+                        <div class="notice-date">2026.07.10</div>
+                    </div>
+                    <div class="notice-content">
+                        <div class="notice-item">
+                            <span>👩‍💼 <strong style="color:#2E7D32;">已安排非常优秀的打印助理值守，代打印服务正式恢复</strong></span>
+                        </div>
+                        <div class="notice-item">
+                            <span>👨‍⚕️ 本人仍在协和医院实习（<span
+                                    id="remainingDays">计算中...</span>），线下订单由打印助理处理，售前咨询、产品建议、设备维护、售后由小本子统一解决</span>
+                        </div>
+                        <div class="notice-item">
+                            <span>✅ <strong>服务方式：</strong>助理打印和自助打印相结合</span>
+                        </div>
+                    </div>
+                    <div class="notice-footer">感谢大家的理解与支持～</div>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 0px; color: rgb(72, 160, 203);">
+                    由于小本子想要实现宿舍打印自由，故宿舍内安放有一台家用喷墨打印机，<br>同时可以适当提供便利的代打印服务。<br>
+                </div>
+                <div style="text-align: center; margin-bottom: 25px; color: rgb(145, 43, 248);  margin-top: 0px">
+                    理论服务范围：综合楼内
+                </div>
+
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <button onclick="showWechatQR()"
+                        style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #fff; border: none; padding: 12px 36px; font-size: 1.1rem; font-weight: bold; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;">
+                        💬 立即联系
+                    </button>
+                </div>
+
+                <div id="pricing" class="section-title">💰 收费标准</div>
+                <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                    非盈利目的 · 主要用于补充覆盖各类成本 · 防止滥用和浪费。阶梯定价 2026/06/25后逐步过渡启用。
+                </p>
+
+                <div class="price-tier-card">
+                    <div class="section-title">📊 阶梯定价说明（鼓励集中打印）</div>
+                    <div class="table-wrapper">
+                        <table class="price-tier-table">
+                            <thead>
+                                <tr>
+                                    <th>单次打印总页数</th>
+                                    <th>黑白单面</th>
+                                    <th>黑白双面</th>
+                                    <th>彩色文字</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="tier-pages">1-3页</div>
+                                    </td>
+                                    <td><span class="price-value">0.60元/页</span></td>
+                                    <td><span class="price-value">0.40元/页</span></td>
+                                    <td><span class="price-value">1.00元/页</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="tier-pages">4-8页</div>
+                                    </td>
+                                    <td><span class="price-value">0.50元/页</span></td>
+                                    <td><span class="price-value">0.35元/页</span></td>
+                                    <td><span class="price-value">0.80元/页</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="tier-pages">9-15页</div>
+                                    </td>
+                                    <td><span class="price-value">0.40元/页</span></td>
+                                    <td><span class="price-value">0.30元/页</span></td>
+                                    <td><span class="price-value">0.70元/页</span></td>
+                                </tr>
+                                <tr class="tier-highlight">
+                                    <td>
+                                        <div class="tier-pages">16页及以上</div>
+                                    </td>
+                                    <td><span class="price-value">0.30元/页</span></td>
+                                    <td><span class="price-value">0.25元/页</span></td>
+                                    <td><span class="price-value">0.60元/页</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: -8px; margin-bottom: 15px;">
+                    💡 计价规则：按单次总页数对应档位，全部页数按对应档位单价统一计算。（如8张黑白单面：8×0.5=4元）
+                </p>
+
+                <p style="font-size: 0.85rem; color: #666; background: #f0f7ff; padding: 10px; border-radius: 8px;">
+                    📌
+                    <strong>说明：</strong>以上价格仅适用于纯文字、简单图表（图片占比 &lt; 20%）。普通黑白扫描件（如病历图片打印等）统一按 0.6元/单页
+                    计算；全彩文档、大面积彩色图片、海报、照片印刷等高墨量文档统一按 1.4元/页 计算，不参与阶梯降价。对于家用打印机性价比不高的情况：建议选择<span
+                        class="cloud-print-link" onclick="showQRCode('小猴云印')">小猴云印</span>、<span class="cloud-print-link"
+                        onclick="showQRCode('刺猬云印')">刺猬云印</span>等在线打印方式。<br>
+                    ⚠️ <strong>注意：</strong>"黑漆漆"的高墨量超大图片文档不适用此价格，请单独私聊咨询。
+                </p>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+
+                <div id="calculator" class="calculator">
+                    <div class="section-title">🧮 价格计算器</div>
+                    <div class="calc-row">
+                        <label class="calc-label">打印页数：</label>
+                        <input type="number" id="pageCount" class="calc-input" placeholder="请输入页数" min="1">
+                    </div>
+                    <div class="calc-row">
+                        <label class="calc-label">打印类型：</label>
+                        <select id="printType" class="calc-select">
+                            <option value="bw_single">黑白单面 <span style="color:#999;font-size:0.8em;">(点击可切换)</span>
+                            </option>
+                            <option value="bw_double">黑白双面</option>
+                            <option value="color_text">彩色文字（纯文字/少量线条图）</option>
+                            <option value="color_full">全彩文档/高墨量图片</option>
+                        </select>
+                    </div>
+                    <button class="calc-button" onclick="calculatePrice()">计算价格</button>
+                    <div id="calcResult" class="calc-result">
+                        <div>预估价格：<span class="result-price" id="totalPrice">0.00</span><span
+                                class="result-unit">元</span>
+                        </div>
+                        <div class="result-info" id="priceInfo"></div>
+                        <div class="result-formula" id="priceFormula"></div>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+
+                <div id="guide" class="section-title">📜 打印须知</div>
+
+                <div class="warning-box">
+                    <strong>⚠️ 请避开休息时间：</strong><br>
+                    🚫 午休、晚睡、上课及学习时间请微信留言，不要直冲宿舍。小本子和助理也有可能出门、出差，原则上不接受非常紧急的请求，不接受"随叫随到"。<br>
+                    <strong>🟢 建议提前约定取件时间和地点，利用自习机会或电梯口桌面交接。</strong>
+                </div>
+
+                <ul>
+                    <li><strong>打印格式与流程：</strong>推荐 PDF 格式，Word、图片 等亦可。发送文件 ➡️ 小本子操作 ➡️ 约定时间地点取件。暂不支持直连打印，建议集中打印。</li>
+                    <li><strong>友情帮助：</strong>可友情提供简单排版、扫描件转换等帮助。</li>
+                </ul>
+
+                <div class="xbz-box">
+                    <p>"小本子"是 E 人，欢迎聊天和提建议 👋<strong>
+                            <br>声明：友情便民服务，不以盈利为目的。</strong>
+                    </p>
+                    <div id="contact" class="wechat-qr-box">
+                        <img src="HTML_1/微信二维码正方形模式设置 (2).png" alt="小本子微信二维码" class="wechat-qr" onclick="showWechatQR()"
+                            style="cursor: pointer;">
+                        <div class="wechat-qr-caption">📱 打印主理人-小本子</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            // ========== 打印机状态管理 ==========
+            // 状态配置：green=在线24h / yellow=请私信 / red=请自助
+            var PRINTER_STATUS = {
+                green: { dot: 'green', text: '打印机在线', desc: '· 24h之内可使用' },
+                yellow: { dot: 'yellow', text: '仅自助远程打印', desc: '· 请微信连线小本子' },
+                red: { dot: 'red', text: '打印机暂不可用', desc: '· 请自助打印' }
+            };
+
+            // 当前状态（修改这里即可切换状态：'green' / 'yellow' / 'red'）
+            var currentPrinterStatus = 'yellow';
+
+            function updatePrinterStatus() {
+                var status = PRINTER_STATUS[currentPrinterStatus];
+                var dot = document.getElementById('statusDot');
+                var text = document.getElementById('statusText');
+                var desc = document.getElementById('statusDesc');
+                var bar = document.getElementById('printerStatusBar');
+
+                dot.className = 'status-dot ' + status.dot;
+                text.textContent = status.text;
+                desc.textContent = status.desc;
+
+                if (status.dot === 'green') {
+                    bar.style.background = '#f0faf0';
+                } else if (status.dot === 'yellow') {
+                    bar.style.background = '#fffdf0';
+                } else {
+                    bar.style.background = '#fff0f0';
+                }
+            }
+
+            updatePrinterStatus();
+
+            // ========== 计算剩余天数 ==========
+            function calculateRemainingDays() {
+                var targetDate = new Date('2026-08-17');
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                targetDate.setHours(0, 0, 0, 0);
+
+                var diffTime = targetDate - today;
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                var daysElement = document.getElementById('remainingDays');
+                if (daysElement) {
+                    if (diffDays <= 0) {
+                        daysElement.textContent = '已结束';
+                    } else {
+                        daysElement.textContent = '剩余' + diffDays + '天';
+                    }
+                }
+            }
+
+            // 页面加载时计算剩余天数
+            window.onload = function () {
+                calculateRemainingDays();
+            };
+
+            function calculatePrice() {
+                var pageCount = parseInt(document.getElementById('pageCount').value);
+                var printType = document.getElementById('printType').value;
+
+                if (isNaN(pageCount) || pageCount < 1) {
+                    alert('请输入有效的打印页数');
+                    return;
+                }
+
+                var pricePerPage = 0;
+                var tierName = '';
+                var tierInfo = '';
+                var tierColor = '';
+
+                if (printType === 'color_full') {
+                    pricePerPage = 1.4;
+                    tierName = '全彩文档';
+                    tierInfo = '全彩文档统一按1.4元/页计算，不参与阶梯降价';
+                    tierColor = '#e65100';
+                } else {
+                    if (pageCount >= 1 && pageCount <= 3) {
+                        tierName = '1-3页';
+                        tierInfo = '1-3页';
+                        tierColor = '#FF9800';
+                        if (printType === 'bw_single') pricePerPage = 0.60;
+                        else if (printType === 'bw_double') pricePerPage = 0.40;
+                        else if (printType === 'color_text') pricePerPage = 1.00;
+                    } else if (pageCount >= 4 && pageCount <= 8) {
+                        tierName = '4-8页';
+                        tierInfo = '4-8页';
+                        tierColor = '#FFB74D';
+                        if (printType === 'bw_single') pricePerPage = 0.50;
+                        else if (printType === 'bw_double') pricePerPage = 0.35;
+                        else if (printType === 'color_text') pricePerPage = 0.80;
+                    } else if (pageCount >= 9 && pageCount <= 15) {
+                        tierName = '9-15页';
+                        tierInfo = '9-15页';
+                        tierColor = '#4CAF50';
+                        if (printType === 'bw_single') pricePerPage = 0.40;
+                        else if (printType === 'bw_double') pricePerPage = 0.30;
+                        else if (printType === 'color_text') pricePerPage = 0.70;
+                    } else {
+                        tierName = '16页及以上';
+                        tierInfo = '16页及以上';
+                        tierColor = '#4A90E2';
+                        if (printType === 'bw_single') pricePerPage = 0.30;
+                        else if (printType === 'bw_double') pricePerPage = 0.25;
+                        else if (printType === 'color_text') pricePerPage = 0.60;
+                    }
+                }
+
+                var totalPrice = (pageCount * pricePerPage).toFixed(2);
+
+                document.getElementById('totalPrice').textContent = totalPrice;
+                document.getElementById('priceInfo').innerHTML = '<span style="color:' + tierColor + ';font-weight:600;">' + tierInfo + '</span> · 单价：' + pricePerPage + '元/页';
+                document.getElementById('priceFormula').textContent = pageCount + '页 × ' + pricePerPage + '元/页 = ' + totalPrice + '元';
+                document.getElementById('calcResult').classList.add('show');
+            }
+
+            // 滚动到指定区域
+            function scrollToSection(sectionId) {
+                var element = document.getElementById(sectionId);
+                if (element) {
+                    var navHeight = document.querySelector('.top-nav').offsetHeight;
+                    var elementTop = element.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+                    window.scrollTo({ top: elementTop, behavior: 'smooth' });
+                }
+            }
+
+            // 滚动监听 - 高亮当前导航项
+            function updateActiveNav() {
+                var sections = ['notice', 'pricing', 'calculator', 'guide'];
+                var navItems = document.querySelectorAll('.top-nav-item');
+                var navHeight = document.querySelector('.top-nav').offsetHeight;
+                var currentSection = '';
+
+                sections.forEach(function (sectionId) {
+                    var element = document.getElementById(sectionId);
+                    if (element) {
+                        var rect = element.getBoundingClientRect();
+                        if (rect.top <= navHeight + 30) {
+                            currentSection = sectionId;
+                        }
+                    }
+                });
+
+                navItems.forEach(function (item) {
+                    item.classList.remove('active');
+                    if (item.getAttribute('data-section') === currentSection) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNav);
+
+            // 显示二维码弹窗
+            function showQRCode(printService) {
+                var modal = document.getElementById('qrModal');
+                var title = document.getElementById('qrTitle');
+                var hint = document.getElementById('qrHint');
+                var imgContainer = document.getElementById('qrSvgContainer');
+
+                title.textContent = printService + ' - 微信扫码';
+                hint.innerHTML = '请使用微信扫描上方二维码，进入' + printService + '小程序<br><span style="font-size:0.78rem;color:#888;">长按保存到手机相册</span>';
+
+                // 使用真实的二维码图片
+                if (printService === '小猴云印') {
+                    imgContainer.innerHTML = '<img src="html  printrer/小猴云印小程序二维码.jpg" alt="小猴云印小程序二维码">';
+                } else if (printService === '刺猬云印') {
+                    imgContainer.innerHTML = '<img src="html  printrer/刺猬云印小程序二维码.jpg" alt="刺猬云印小程序二维码">';
+                }
+
+                modal.classList.add('show');
+            }
+
+            // 关闭二维码弹窗
+            function closeQRCode() {
+                var modal = document.getElementById('qrModal');
+                modal.classList.remove('show');
+            }
+
+            // 显示微信二维码放大图
+            function showWechatQR() {
+                var modal = document.getElementById('qrModal');
+                var title = document.getElementById('qrTitle');
+                var hint = document.getElementById('qrHint');
+                var imgContainer = document.getElementById('qrSvgContainer');
+
+                title.textContent = '📱 打印主理人-小本子';
+                hint.innerHTML = '请使用微信扫描上方二维码添加好友<br><span style="font-size:0.78rem;color:#888;">长按保存到手机相册</span>';
+                imgContainer.innerHTML = '<img src="HTML_1/微信二维码正方形模式设置 (2).png" alt="小本子微信二维码" style="width:280px;height:280px;border-radius:16px;border:3px solid #07C160;padding:4px;background:#fff;">';
+
+                modal.classList.add('show');
+            }
+        </script>
+
+        <!-- 二维码气泡弹窗 -->
+        <div id="qrModal" class="qr-modal-overlay" onclick="closeQRCode()">
+            <div class="qr-modal" onclick="event.stopPropagation()">
+                <div class="qr-modal-title" id="qrTitle">二维码</div>
+                <div class="qr-image" id="qrSvgContainer"></div>
+                <div class="qr-hint" id="qrHint"></div>
+                <button class="qr-close-btn" onclick="closeQRCode()">关闭</button>
+            </div>
+        </div>
+    </div> <!-- 闭合container -->
+    </div> <!-- 闭合page-body -->
+
+</body>
+
+</html>
