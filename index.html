@@ -60,11 +60,11 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.85);
+            background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
             backdrop-filter: saturate(180%) blur(16px);
             -webkit-backdrop-filter: saturate(180%) blur(16px);
-            border-bottom: 1px solid rgba(229, 231, 235, 0.7);
-            box-shadow: 0 1px 0 rgba(17, 24, 39, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
             padding: 8px 16px;
             padding-top: max(8px, env(safe-area-inset-top));
         }
@@ -88,11 +88,11 @@
         .top-nav-title {
             font-size: 0.85rem;
             font-weight: 700;
-            color: var(--primary);
+            color: #FCD34D;
             white-space: nowrap;
             margin-right: 6px;
             padding-right: 12px;
-            border-right: 1px solid var(--border);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
             flex-shrink: 0;
         }
 
@@ -103,13 +103,13 @@
             padding: 8px 14px;
             cursor: pointer;
             font-size: 0.8rem;
-            color: var(--text-main);
+            color: rgba(255, 255, 255, 0.92);
             white-space: nowrap;
             border-radius: var(--radius-pill);
             transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
             flex-shrink: 0;
             text-decoration: none;
-            background: var(--bg-soft);
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid transparent;
             user-select: none;
             -webkit-user-select: none;
@@ -117,16 +117,16 @@
         }
 
         .top-nav-item:hover {
-            background: #fff;
-            border-color: var(--border);
-            box-shadow: var(--shadow-sm);
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.22);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
         }
 
         .top-nav-item.active {
-            background: var(--primary);
-            color: #fff;
+            background: #FFFFFF;
+            color: var(--primary-dark);
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.28);
+            box-shadow: 0 2px 12px rgba(255, 255, 255, 0.32);
         }
 
         .top-nav-item .nav-icon {
@@ -135,15 +135,15 @@
         }
 
         .top-nav-item.contact-btn {
-            background: #ECFDF5;
-            border-color: #A7F3D0;
-            color: #047857;
+            background: rgba(16, 185, 129, 0.22);
+            border-color: rgba(110, 231, 183, 0.5);
+            color: #6EE7B7;
             font-weight: 600;
         }
 
         .top-nav-item.contact-btn:hover {
-            background: #D1FAE5;
-            border-color: #6EE7B7;
+            background: rgba(16, 185, 129, 0.36);
+            border-color: #34D399;
         }
 
         /* ========== 打印机状态指示器 ========== */
@@ -1264,8 +1264,8 @@
             </div>
 
             <div class="content">
-                <!-- 自助打印模式通知 -->
-                <div class="self-service-notice">
+                <!-- 自助打印模式通知（兼作"公告通知"导航锚点）-->
+                <div id="notice" class="self-service-notice">
                     <div class="notice-title-row">
                         <div class="notice-title">⚠️ 当前为自助打印模式</div>
                         <div class="notice-date">2026.07.10 16:00</div>
@@ -1288,27 +1288,6 @@
                     <div class="notice-reminder">
                         请在不打扰大家学习和休息的情况下，友情连线，友好求助。请爱护机器，防止机器掉落！注意不可打扰舍友休息和学习，不可随意翻动私人用品。
                     </div>
-                </div>
-
-                <!-- 公告栏 -->
-                <div id="notice" class="notice-banner">
-                    <div class="notice-title-row">
-                        <div class="notice-title">📢 服务恢复 & 运营调整公告</div>
-                        <div class="notice-date">2026.07.10</div>
-                    </div>
-                    <div class="notice-content">
-                        <div class="notice-item">
-                            <span>👩‍💼 <strong style="color:#2E7D32;">已安排非常优秀的打印助理值守，代打印服务正式恢复</strong></span>
-                        </div>
-                        <div class="notice-item">
-                            <span>👨‍⚕️ 本人仍在协和医院实习（<span
-                                    id="remainingDays">计算中...</span>），线下订单由打印助理处理，售前咨询、产品建议、设备维护、售后由小本子统一解决</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>✅ <strong>服务方式：</strong>助理打印和自助打印相结合</span>
-                        </div>
-                    </div>
-                    <div class="notice-footer">感谢大家的理解与支持～</div>
                 </div>
 
                 <div class="intro-text">
@@ -1449,10 +1428,10 @@
 
         <script>
             // ========== 打印机状态管理 ==========
-            // 状态配置：green=在线24h / yellow=请私信 / red=请自助
+            // 状态配置：green=在线24h / yellow=自助远程打印(绿灯显示) / red=不可用
             var PRINTER_STATUS = {
                 green: { dot: 'green', text: '打印机在线', desc: '· 24h之内可使用' },
-                yellow: { dot: 'yellow', text: '仅自助远程打印', desc: '· 请微信连线小本子' },
+                yellow: { dot: 'green', text: '仅自助远程打印', desc: '· 请微信连线小本子' },
                 red: { dot: 'red', text: '打印机暂不可用', desc: '· 请自助打印' }
             };
 
