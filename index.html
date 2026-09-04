@@ -1256,40 +1256,14 @@
                 <div class="version-tag">v1.7 2026/07/10 更新</div>
             </div>
 
-            <!-- 打印机状态 -->
-            <div class="printer-status-bar" id="printerStatusBar">
+            <!-- 打印机状态（兼作"公告通知"导航锚点）-->
+            <div class="printer-status-bar" id="notice">
                 <span class="status-dot green" id="statusDot"></span>
-                <span class="status-text" id="statusText">打印机在线</span>
-                <span class="status-desc" id="statusDesc">· 24h之内可使用</span>
+                <span class="status-text" id="statusText">🖨️ 打印机正常</span>
+                <span class="status-desc" id="statusDesc">· 24h内可用</span>
             </div>
 
             <div class="content">
-                <!-- 自助打印模式通知（兼作"公告通知"导航锚点）-->
-                <div id="notice" class="self-service-notice">
-                    <div class="notice-title-row">
-                        <div class="notice-title">⚠️ 当前为自助打印模式</div>
-                        <div class="notice-date">2026.07.10 16:00</div>
-                    </div>
-                    <div class="notice-content">
-                        <div class="notice-item">
-                            <span>由于打印站工作人员均外出，当前为自助远程打印模式</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>✅ 可通过微信视频远程协助 + 自助打印</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>（为避免排版错误，暂时不建议双面打印）</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>⏰ 预计恢复时间：2026年7月13日（星期一）</span>
-                        </div>
-                    </div>
-                    <div class="notice-footer">感谢大家的理解与支持！</div>
-                    <div class="notice-reminder">
-                        请在不打扰大家学习和休息的情况下，友情连线，友好求助。请爱护机器，防止机器掉落！注意不可打扰舍友休息和学习，不可随意翻动私人用品。
-                    </div>
-                </div>
-
                 <div class="intro-text">
                     由于小本子想要实现宿舍打印自由，故宿舍内安放有一台家用喷墨打印机，<br>同时可以适当提供便利的代打印服务。<br>
                 </div>
@@ -1428,22 +1402,22 @@
 
         <script>
             // ========== 打印机状态管理 ==========
-            // 状态配置：green=在线24h / yellow=自助远程打印(绿灯显示) / red=不可用
+            // 状态配置：green=正常 / yellow=自助远程 / red=不可用
             var PRINTER_STATUS = {
-                green: { dot: 'green', text: '打印机在线', desc: '· 24h之内可使用' },
+                green: { dot: 'green', text: '🖨️ 打印机正常', desc: '· 24h内可用' },
                 yellow: { dot: 'green', text: '仅自助远程打印', desc: '· 请微信连线小本子' },
                 red: { dot: 'red', text: '打印机暂不可用', desc: '· 请自助打印' }
             };
 
             // 当前状态（修改这里即可切换状态：'green' / 'yellow' / 'red'）
-            var currentPrinterStatus = 'yellow';
+            var currentPrinterStatus = 'green';
 
             function updatePrinterStatus() {
                 var status = PRINTER_STATUS[currentPrinterStatus];
                 var dot = document.getElementById('statusDot');
                 var text = document.getElementById('statusText');
                 var desc = document.getElementById('statusDesc');
-                var bar = document.getElementById('printerStatusBar');
+                var bar = document.getElementById('notice');
 
                 dot.className = 'status-dot ' + status.dot;
                 text.textContent = status.text;
