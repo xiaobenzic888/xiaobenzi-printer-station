@@ -1031,10 +1031,6 @@
     <div class="top-nav">
         <div class="top-nav-inner">
             <div class="top-nav-title">📑 导航栏</div>
-            <div class="top-nav-item" onclick="scrollToSection('notice')" data-section="notice">
-                <span class="nav-icon">📢</span>
-                <span>公告通知</span>
-            </div>
             <div class="top-nav-item" onclick="scrollToSection('pricing')" data-section="pricing">
                 <span class="nav-icon">💰</span>
                 <span>收费标准</span>
@@ -1059,7 +1055,7 @@
             <div class="header">
                 <h1>📄 <span style="color: #FFD700; text-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);">小本子</span>打印站 🖨
                 </h1>
-                <div class="version-tag">v1.7 2026/07/10 更新</div>
+                <div class="version-tag">v1.8 2026/08/26 更新</div>
             </div>
 
             <!-- 打印机状态 -->
@@ -1070,53 +1066,6 @@
             </div>
 
             <div class="content">
-                <!-- 自助打印模式通知 -->
-                <div class="self-service-notice">
-                    <div class="notice-title-row">
-                        <div class="notice-title">⚠️ 当前为自助打印模式</div>
-                        <div class="notice-date">2026.07.10 16:00</div>
-                    </div>
-                    <div class="notice-content">
-                        <div class="notice-item">
-                            <span>由于打印站工作人员均外出，当前为自助远程打印模式</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>✅ 可通过微信视频远程协助 + 自助打印</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>（为避免排版错误，暂时不建议双面打印）</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>⏰ 预计恢复时间：2026年7月13日（星期一）</span>
-                        </div>
-                    </div>
-                    <div class="notice-footer">感谢大家的理解与支持！</div>
-                    <div class="notice-reminder">
-                        请在不打扰大家学习和休息的情况下，友情连线，友好求助。请爱护机器，防止机器掉落！注意不可打扰舍友休息和学习，不可随意翻动私人用品。
-                    </div>
-                </div>
-
-                <!-- 公告栏 -->
-                <div id="notice" class="notice-banner">
-                    <div class="notice-title-row">
-                        <div class="notice-title">📢 服务恢复 & 运营调整公告</div>
-                        <div class="notice-date">2026.07.10</div>
-                    </div>
-                    <div class="notice-content">
-                        <div class="notice-item">
-                            <span>👩‍💼 <strong style="color:#2E7D32;">已安排非常优秀的打印助理值守，代打印服务正式恢复</strong></span>
-                        </div>
-                        <div class="notice-item">
-                            <span>👨‍⚕️ 本人仍在协和医院实习（<span
-                                    id="remainingDays">计算中...</span>），线下订单由打印助理处理，售前咨询、产品建议、设备维护、售后由小本子统一解决</span>
-                        </div>
-                        <div class="notice-item">
-                            <span>✅ <strong>服务方式：</strong>助理打印和自助打印相结合</span>
-                        </div>
-                    </div>
-                    <div class="notice-footer">感谢大家的理解与支持～</div>
-                </div>
-
                 <div style="text-align: center; margin-bottom: 0px; color: rgb(72, 160, 203);">
                     由于小本子想要实现宿舍打印自由，故宿舍内安放有一台家用喷墨打印机，<br>同时可以适当提供便利的代打印服务。<br>
                 </div>
@@ -1266,7 +1215,7 @@
             };
 
             // 当前状态（修改这里即可切换状态：'green' / 'yellow' / 'red'）
-            var currentPrinterStatus = 'yellow';
+            var currentPrinterStatus = 'green';
 
             function updatePrinterStatus() {
                 var status = PRINTER_STATUS[currentPrinterStatus];

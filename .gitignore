@@ -7,3 +7,6 @@
 *.bak.*
 index.html.c-qingya.*
 index.html.bak.*
+
+# 本地公告存档（内部，可能修改后重新发布）
+公告存档.md
