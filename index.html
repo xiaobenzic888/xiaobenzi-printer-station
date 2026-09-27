@@ -334,6 +334,10 @@
                 text-decoration-color: rgba(170, 170, 170, 0.5);
             }
 
+            .holiday-table tr.active td {
+                background: rgba(74, 144, 226, 0.18);
+            }
+
             .table-wrapper {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -1114,19 +1118,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr data-end="2026-09-27">
+                                <tr data-start="2026-09-25" data-end="2026-09-27">
                                     <td>9.25 — 9.27（中秋）</td>
-                                    <td>🟡 放假中，特殊情况请提前联系</td>
+                                    <td>🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
                                 </tr>
-                                <tr data-end="2026-09-30">
+                                <tr data-start="2026-09-28" data-end="2026-09-30">
                                     <td>9.28 — 9.30</td>
                                     <td>🟢 正常服务</td>
                                 </tr>
-                                <tr data-end="2026-10-07">
+                                <tr data-start="2026-10-01" data-end="2026-10-07">
                                     <td>10.1 — 10.7（国庆）</td>
-                                    <td>🟡 放假中，特殊情况请提前联系</td>
+                                    <td>🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
                                 </tr>
-                                <tr data-end="2099-12-31">
+                                <tr data-start="2026-10-08" data-end="2099-12-31">
                                     <td>10.8 起</td>
                                     <td>🟢 正常服务</td>
                                 </tr>
@@ -1280,7 +1284,7 @@
             // 状态配置：green=在线24h / yellow=放假中 / red=请自助
             var PRINTER_STATUS = {
                 green: { dot: 'green', text: '打印机在线', desc: '· 24h之内可使用' },
-                yellow: { dot: 'yellow', text: '放假 happy 中', desc: '· 特殊情况请提前联系' },
+                yellow: { dot: 'yellow', text: '放假 happy 中', desc: '· 请私信小本子或打印助理以确认是否可以打印' },
                 red: { dot: 'red', text: '打印机暂不可用', desc: '· 请自助打印' }
             };
 
@@ -1339,10 +1343,14 @@
                 today.setHours(0, 0, 0, 0);
                 var rows = table.querySelectorAll('tbody tr[data-end]');
                 for (var i = 0; i < rows.length; i++) {
+                    var startDate = new Date(rows[i].getAttribute('data-start') + 'T00:00:00');
                     var endDate = new Date(rows[i].getAttribute('data-end') + 'T00:00:00');
+                    startDate.setHours(0, 0, 0, 0);
                     endDate.setHours(0, 0, 0, 0);
                     if (today > endDate) {
                         rows[i].classList.add('expired');
+                    } else if (today >= startDate && today <= endDate) {
+                        rows[i].classList.add('active');
                     }
                 }
             })();
