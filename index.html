@@ -301,43 +301,6 @@
                 margin-top: 7px;
             }
 
-            .holiday-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 4px;
-                font-size: 0.82rem;
-            }
-
-            .holiday-table th {
-                text-align: left;
-                padding: 7px 10px;
-                background: rgba(74, 144, 226, 0.12);
-                color: #2c5282;
-                font-weight: 600;
-                border-bottom: 2px solid rgba(74, 144, 226, 0.3);
-            }
-
-            .holiday-table td {
-                padding: 9px 10px;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-                line-height: 1.5;
-            }
-
-            .holiday-table tr:last-child td {
-                border-bottom: none;
-            }
-
-            .holiday-table tr.expired td {
-                color: #aaa;
-                opacity: 0.55;
-                text-decoration: line-through;
-                text-decoration-color: rgba(170, 170, 170, 0.5);
-            }
-
-            .holiday-table tr.active td {
-                background: rgba(74, 144, 226, 0.18);
-            }
-
             .table-wrapper {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -425,6 +388,70 @@
             .section-title {
                 font-size: 0.88rem !important;
             }
+        }
+
+        /* 假期安排表格（全端生效，不限于手机） */
+        .holiday-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4px;
+            font-size: 0.82rem;
+        }
+
+        .holiday-table th {
+            text-align: left;
+            padding: 7px 10px;
+            background: rgba(46, 125, 50, 0.10);
+            color: #2e7d32;
+            font-weight: 700;
+            border-bottom: 2px solid rgba(46, 125, 50, 0.30);
+        }
+
+        .holiday-table td {
+            padding: 9px 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            line-height: 1.5;
+        }
+
+        .holiday-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .holiday-table tr.expired td {
+            color: #aaa;
+            opacity: 0.55;
+            text-decoration: line-through;
+            text-decoration-color: rgba(170, 170, 170, 0.5);
+        }
+
+        .holiday-table tr.active td {
+            background: rgba(46, 125, 50, 0.15);
+        }
+
+        .holiday-table .time-cell {
+            white-space: nowrap;
+            vertical-align: top;
+        }
+
+        .holiday-table .time-cell .holiday-date {
+            display: block;
+            white-space: nowrap;
+            line-height: 1.5;
+        }
+
+        .holiday-table .time-cell .holiday-label {
+            display: block;
+            white-space: nowrap;
+            color: #888;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        .holiday-table .status-cell {
+            vertical-align: top;
+            min-width: 0;
+            word-break: normal;
+            overflow-wrap: break-word;
         }
 
         /* 页面主体需要留出导航栏高度 */
@@ -784,6 +811,16 @@
             font-family: "Menlo", "Consolas", monospace;
         }
 
+        .result-type {
+            font-size: 0.78rem;
+            color: #8a9a8c;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(46, 125, 50, 0.25);
+            user-select: all;
+            -webkit-user-select: all;
+        }
+
         /* 优化后的阶梯定价卡片样式 */
         .price-tier-card {
             background: #ffffff;
@@ -1119,20 +1156,20 @@
                             </thead>
                             <tbody>
                                 <tr data-start="2026-09-25" data-end="2026-09-27">
-                                    <td>9.25 — 9.27（中秋）</td>
-                                    <td>🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
+                                    <td class="time-cell"><span class="holiday-date">9.25 — 9.27</span><span class="holiday-label">（中秋）</span></td>
+                                    <td class="status-cell">🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
                                 </tr>
                                 <tr data-start="2026-09-28" data-end="2026-09-30">
-                                    <td>9.28 — 9.30</td>
-                                    <td>🟢 正常服务</td>
+                                    <td class="time-cell"><span class="holiday-date">9.28 — 9.30</span></td>
+                                    <td class="status-cell">🟢 正常服务</td>
                                 </tr>
                                 <tr data-start="2026-10-01" data-end="2026-10-07">
-                                    <td>10.1 — 10.7（国庆）</td>
-                                    <td>🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
+                                    <td class="time-cell"><span class="holiday-date">10.1 — 10.7</span><span class="holiday-label">（国庆）</span></td>
+                                    <td class="status-cell">🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
                                 </tr>
                                 <tr data-start="2026-10-08" data-end="2099-12-31">
-                                    <td>10.8 起</td>
-                                    <td>🟢 正常服务</td>
+                                    <td class="time-cell"><span class="holiday-date">10.8 起</span></td>
+                                    <td class="status-cell">🟢 正常服务</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1247,6 +1284,7 @@
                         </div>
                         <div class="result-info" id="priceInfo"></div>
                         <div class="result-formula" id="priceFormula"></div>
+                        <div class="result-type" id="priceType"></div>
                     </div>
                 </div>
 
@@ -1380,6 +1418,13 @@
                 calculateRemainingDays();
             };
 
+            var PRINT_TYPE_LABELS = {
+                bw_single: '黑白单面',
+                bw_double: '黑白双面',
+                color_text: '彩色文字（纯文字/少量线条图）',
+                color_full: '全彩文档/高墨量图片'
+            };
+
             function calculatePrice() {
                 var pageCount = parseInt(document.getElementById('pageCount').value);
                 var printType = document.getElementById('printType').value;
@@ -1436,6 +1481,7 @@
                 document.getElementById('totalPrice').textContent = totalPrice;
                 document.getElementById('priceInfo').innerHTML = '<span style="color:' + tierColor + ';font-weight:600;">' + tierInfo + '</span> · 单价：' + pricePerPage + '元/页';
                 document.getElementById('priceFormula').textContent = pageCount + '页 × ' + pricePerPage + '元/页 = ' + totalPrice + '元';
+                document.getElementById('priceType').textContent = '打印类型：' + (PRINT_TYPE_LABELS[printType] || printType);
                 document.getElementById('calcResult').classList.add('show');
             }
 
