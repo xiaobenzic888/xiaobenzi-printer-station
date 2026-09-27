@@ -301,6 +301,39 @@
                 margin-top: 7px;
             }
 
+            .holiday-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 4px;
+                font-size: 0.82rem;
+            }
+
+            .holiday-table th {
+                text-align: left;
+                padding: 7px 10px;
+                background: rgba(74, 144, 226, 0.12);
+                color: #2c5282;
+                font-weight: 600;
+                border-bottom: 2px solid rgba(74, 144, 226, 0.3);
+            }
+
+            .holiday-table td {
+                padding: 9px 10px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+                line-height: 1.5;
+            }
+
+            .holiday-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .holiday-table tr.expired td {
+                color: #aaa;
+                opacity: 0.55;
+                text-decoration: line-through;
+                text-decoration-color: rgba(170, 170, 170, 0.5);
+            }
+
             .table-wrapper {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -1066,6 +1099,43 @@
             </div>
 
             <div class="content">
+                <!-- 公告栏：假期安排 -->
+                <div class="notice-banner">
+                    <div class="notice-title-row">
+                        <div class="notice-title">📢 中秋·国庆假期服务安排</div>
+                        <div class="notice-date">2026.09.24</div>
+                    </div>
+                    <div class="notice-content">
+                        <table class="holiday-table" id="holidayTable">
+                            <thead>
+                                <tr>
+                                    <th>时段</th>
+                                    <th>服务状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-end="2026-09-27">
+                                    <td>9.25 — 9.27（中秋）</td>
+                                    <td>🟡 放假中，特殊情况请提前联系</td>
+                                </tr>
+                                <tr data-end="2026-09-30">
+                                    <td>9.28 — 9.30</td>
+                                    <td>🟢 正常服务</td>
+                                </tr>
+                                <tr data-end="2026-10-07">
+                                    <td>10.1 — 10.7（国庆）</td>
+                                    <td>🟡 放假中，特殊情况请提前联系</td>
+                                </tr>
+                                <tr data-end="2099-12-31">
+                                    <td>10.8 起</td>
+                                    <td>🟢 正常服务</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="notice-footer">假期快乐🎉 · 感谢大家的理解与支持</div>
+                </div>
+
                 <div style="text-align: center; margin-bottom: 0px; color: rgb(72, 160, 203);">
                     由于小本子想要实现宿舍打印自由，故宿舍内安放有一台家用喷墨打印机，<br>同时可以适当提供便利的代打印服务。<br>
                 </div>
@@ -1207,15 +1277,37 @@
 
         <script>
             // ========== 打印机状态管理 ==========
-            // 状态配置：green=在线24h / yellow=请私信 / red=请自助
+            // 状态配置：green=在线24h / yellow=放假中 / red=请自助
             var PRINTER_STATUS = {
                 green: { dot: 'green', text: '打印机在线', desc: '· 24h之内可使用' },
-                yellow: { dot: 'yellow', text: '仅自助远程打印', desc: '· 请微信连线小本子' },
+                yellow: { dot: 'yellow', text: '放假 happy 中', desc: '· 特殊情况请提前联系' },
                 red: { dot: 'red', text: '打印机暂不可用', desc: '· 请自助打印' }
             };
 
-            // 当前状态（修改这里即可切换状态：'green' / 'yellow' / 'red'）
-            var currentPrinterStatus = 'green';
+            // 假期时间表：命中区间显示黄灯「放假 happy 中」，其余日期默认绿灯
+            // 格式：{ start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }
+            var STATUS_SCHEDULE = [
+                { start: '2026-09-25', end: '2026-09-27' }, // 中秋
+                { start: '2026-10-01', end: '2026-10-07' }  // 国庆
+            ];
+
+            // 根据当前日期自动判定状态
+            function detectStatusByDate() {
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                for (var i = 0; i < STATUS_SCHEDULE.length; i++) {
+                    var s = new Date(STATUS_SCHEDULE[i].start + 'T00:00:00');
+                    var e = new Date(STATUS_SCHEDULE[i].end + 'T00:00:00');
+                    s.setHours(0, 0, 0, 0);
+                    e.setHours(0, 0, 0, 0);
+                    if (today >= s && today <= e) {
+                        return 'yellow';
+                    }
+                }
+                return 'green';
+            }
+
+            var currentPrinterStatus = detectStatusByDate();
 
             function updatePrinterStatus() {
                 var status = PRINTER_STATUS[currentPrinterStatus];
@@ -1238,6 +1330,22 @@
             }
 
             updatePrinterStatus();
+
+            // ========== 假期表格：已过时段自动置灰 ==========
+            (function markExpiredHolidayRows() {
+                var table = document.getElementById('holidayTable');
+                if (!table) return;
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                var rows = table.querySelectorAll('tbody tr[data-end]');
+                for (var i = 0; i < rows.length; i++) {
+                    var endDate = new Date(rows[i].getAttribute('data-end') + 'T00:00:00');
+                    endDate.setHours(0, 0, 0, 0);
+                    if (today > endDate) {
+                        rows[i].classList.add('expired');
+                    }
+                }
+            })();
 
             // ========== 计算剩余天数 ==========
             function calculateRemainingDays() {
