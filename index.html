@@ -390,70 +390,6 @@
             }
         }
 
-        /* 假期安排表格（全端生效，不限于手机） */
-        .holiday-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 4px;
-            font-size: 0.82rem;
-        }
-
-        .holiday-table th {
-            text-align: left;
-            padding: 7px 10px;
-            background: rgba(46, 125, 50, 0.10);
-            color: #2e7d32;
-            font-weight: 700;
-            border-bottom: 2px solid rgba(46, 125, 50, 0.30);
-        }
-
-        .holiday-table td {
-            padding: 9px 10px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            line-height: 1.5;
-        }
-
-        .holiday-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .holiday-table tr.expired td {
-            color: #aaa;
-            opacity: 0.55;
-            text-decoration: line-through;
-            text-decoration-color: rgba(170, 170, 170, 0.5);
-        }
-
-        .holiday-table tr.active td {
-            background: rgba(46, 125, 50, 0.15);
-        }
-
-        .holiday-table .time-cell {
-            white-space: nowrap;
-            vertical-align: top;
-        }
-
-        .holiday-table .time-cell .holiday-date {
-            display: block;
-            white-space: nowrap;
-            line-height: 1.5;
-        }
-
-        .holiday-table .time-cell .holiday-label {
-            display: block;
-            white-space: nowrap;
-            color: #888;
-            font-size: 0.85em;
-            line-height: 1.5;
-        }
-
-        .holiday-table .status-cell {
-            vertical-align: top;
-            min-width: 0;
-            word-break: normal;
-            overflow-wrap: break-word;
-        }
-
         /* 页面主体需要留出导航栏高度 */
         .page-body {
             padding: 58px 20px 20px;
@@ -1129,7 +1065,7 @@
             <div class="header">
                 <h1>📄 <span style="color: #FFD700; text-shadow: 0 2px 4px rgba(255, 165, 0, 0.3);">小本子</span>打印站 🖨
                 </h1>
-                <div class="version-tag">v1.8 2026/08/26 更新</div>
+                <div class="version-tag">v1.8.1 2026/10/25 更新</div>
             </div>
 
             <!-- 打印机状态 -->
@@ -1140,43 +1076,6 @@
             </div>
 
             <div class="content">
-                <!-- 公告栏：假期安排 -->
-                <div class="notice-banner">
-                    <div class="notice-title-row">
-                        <div class="notice-title">📢 中秋·国庆假期服务安排</div>
-                        <div class="notice-date">2026.09.24</div>
-                    </div>
-                    <div class="notice-content">
-                        <table class="holiday-table" id="holidayTable">
-                            <thead>
-                                <tr>
-                                    <th>时段</th>
-                                    <th>服务状态</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr data-start="2026-09-25" data-end="2026-09-27">
-                                    <td class="time-cell"><span class="holiday-date">9.25 — 9.27</span><span class="holiday-label">（中秋）</span></td>
-                                    <td class="status-cell">🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
-                                </tr>
-                                <tr data-start="2026-09-28" data-end="2026-09-30">
-                                    <td class="time-cell"><span class="holiday-date">9.28 — 9.30</span></td>
-                                    <td class="status-cell">🟢 正常服务</td>
-                                </tr>
-                                <tr data-start="2026-10-01" data-end="2026-10-07">
-                                    <td class="time-cell"><span class="holiday-date">10.1 — 10.7</span><span class="holiday-label">（国庆）</span></td>
-                                    <td class="status-cell">🟡 放假中，请私信小本子或打印助理以确认是否可以打印</td>
-                                </tr>
-                                <tr data-start="2026-10-08" data-end="2099-12-31">
-                                    <td class="time-cell"><span class="holiday-date">10.8 起</span></td>
-                                    <td class="status-cell">🟢 正常服务</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="notice-footer">假期快乐🎉 · 感谢大家的理解与支持</div>
-                </div>
-
                 <div style="text-align: center; margin-bottom: 0px; color: rgb(72, 160, 203);">
                     由于小本子想要实现宿舍打印自由，故宿舍内安放有一台家用喷墨打印机，<br>同时可以适当提供便利的代打印服务。<br>
                 </div>
@@ -1327,10 +1226,8 @@
             };
 
             // 假期时间表：命中区间显示黄灯「放假 happy 中」，其余日期默认绿灯
-            // 格式：{ start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }
+            // 格式：{ start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' }，按需追加假期区间
             var STATUS_SCHEDULE = [
-                { start: '2026-09-25', end: '2026-09-27' }, // 中秋
-                { start: '2026-10-01', end: '2026-10-07' }  // 国庆
             ];
 
             // 根据当前日期自动判定状态
@@ -1372,26 +1269,6 @@
             }
 
             updatePrinterStatus();
-
-            // ========== 假期表格：已过时段自动置灰 ==========
-            (function markExpiredHolidayRows() {
-                var table = document.getElementById('holidayTable');
-                if (!table) return;
-                var today = new Date();
-                today.setHours(0, 0, 0, 0);
-                var rows = table.querySelectorAll('tbody tr[data-end]');
-                for (var i = 0; i < rows.length; i++) {
-                    var startDate = new Date(rows[i].getAttribute('data-start') + 'T00:00:00');
-                    var endDate = new Date(rows[i].getAttribute('data-end') + 'T00:00:00');
-                    startDate.setHours(0, 0, 0, 0);
-                    endDate.setHours(0, 0, 0, 0);
-                    if (today > endDate) {
-                        rows[i].classList.add('expired');
-                    } else if (today >= startDate && today <= endDate) {
-                        rows[i].classList.add('active');
-                    }
-                }
-            })();
 
             // ========== 计算剩余天数 ==========
             function calculateRemainingDays() {
